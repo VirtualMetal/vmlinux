@@ -1,0 +1,49 @@
+name: build
+
+env:
+  VMLINUX_KERNEL: linux-6.0
+
+on:
+  push:
+    branches:
+      # build on all branches except master
+      - '*'
+      - '!master'
+    tags:
+      # build on release tags only
+      - 'r[0-9]+*'
+      - 'v[0-9]+*'
+  workflow_dispatch:
+
+jobs:
+
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Prepare environment
+        id: environment
+        run: |
+          SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+          echo release_name=$(date --date=@$SOURCE_DATE_EPOCH +%Y-%m-%d) >>$GITHUB_ENV
+      - name: Install prerequisites
+        run: |
+          sudo apt install build-essential libncurses-dev libssl-dev libelf-dev bison flex bc
+      - name: Download Linux kernel source
+        run: |
+          wget -q https://cdn.kernel.org/pub/linux/kernel/v6.x/$VMLINUX_KERNEL.tar.xz
+          tar xf $VMLINUX_KERNEL.tar.xz
+      - name: Build Linux kernel
+        run: |
+          cd $VMLINUX_KERNEL
+          cp ../vmlinux.config .config
+          make -j4
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          name: vmlinux ${{ env.release_name }}
+          body: |
+            Version: ${{ env.VMLINUX_KERNEL }}
+          files: ${{ env.VMLINUX_KERNEL }}/vmlinux
