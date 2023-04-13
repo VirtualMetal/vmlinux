@@ -67,5 +67,7 @@ jobs:
         with:
           name: vmlinux ${{ env.release_name }}
           body: |
-            Version: ${{ env.VMLINUX_KERNEL }}
+            Included:
+            - ${{ env.VMLINUX_KERNEL }}
+            - ${{ env.VMLINUX_BUSYBOX }}
           files: ${{ env.VMLINUX_KERNEL }}/vmlinux
