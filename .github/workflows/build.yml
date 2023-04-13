@@ -2,6 +2,7 @@ name: build
 
 env:
   VMLINUX_KERNEL: linux-6.0
+  VMLINUX_BUSYBOX: busybox-1.34.1
 
 on:
   push:
@@ -34,11 +35,32 @@ jobs:
         run: |
           wget -q https://cdn.kernel.org/pub/linux/kernel/v6.x/$VMLINUX_KERNEL.tar.xz
           tar xf $VMLINUX_KERNEL.tar.xz
+      - name: Download Busybox source
+        run: |
+          wget -q https://busybox.net/downloads/$VMLINUX_BUSYBOX.tar.bz2
+          tar xf $VMLINUX_BUSYBOX.tar.bz2
+      - name: Build Busybox
+        run: |
+          cd $VMLINUX_BUSYBOX
+          cp ../busybox.config .config
+          make oldconfig
+          make -j4
       - name: Build Linux kernel
         run: |
           cd $VMLINUX_KERNEL
+          mkdir initramfs
+          cp ../$VMLINUX_BUSYBOX/busybox initramfs
+          touch initramfs/init.sh
+          echo #!/bin/busybox sh                                >> initramfs/init.sh
+          echo /bin/busybox install                             >> initramfs/init.sh
+          echo exec /bin/sh                                     >> initramfs/init.sh
+          touch initramfs/source
+          echo file /init initramfs/init.sh 755 0 0             >> initramfs/source
+          echo dir /bin 755 0 0                                 >> initramfs/source
+          echo file /bin/busybox initramfs/busybox 755 0 0      >> initramfs/source
           cp ../vmlinux.config .config
-          make -j4
+          make oldconfig
+          make CONFIG_INITRAMFS_SOURCE=initramfs/source -j4
       - name: Create release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
