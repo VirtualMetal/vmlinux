@@ -3,6 +3,5 @@
 # mount -t proc none /proc
 # mount -t sysfs none /sys
 /bin/busybox --install -s
-/bin/echo WORKSWORKSWORKSWORKSWORKSWORKSWORKSWORKS > /dev/console
-/bin/echo PATH=$PATH > /dev/console
+/bin/echo PATH=$PATH
 exec /bin/sh
