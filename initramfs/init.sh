@@ -1,7 +1,6 @@
-#!/bin/sh
-# mount -t devtmpfs none /dev
-# mount -t proc none /proc
-# mount -t sysfs none /sys
-/bin/busybox --install -s
-/bin/echo PATH=$PATH
+#!/bin/busybox sh
+/bin/busybox --install
+/bin/mount -t devtmpfs none /dev
+/bin/mount -t proc none /proc
+/bin/mount -t sysfs none /sys
 exec /bin/sh
