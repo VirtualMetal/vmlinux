@@ -23,11 +23,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Prepare environment
-        id: environment
-        run: |
-          SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
-          echo release_name=$(date --date=@$SOURCE_DATE_EPOCH +%Y-%m-%d) >>$GITHUB_ENV
       - name: Install prerequisites
         run: |
           sudo apt install build-essential libncurses-dev libssl-dev libelf-dev bison flex bc
@@ -45,6 +40,7 @@ jobs:
           # see https://reproducible-builds.org/specs/source-date-epoch/
           SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
           echo SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH >>$GITHUB_ENV
+          echo release_name=$(date --date=@$SOURCE_DATE_EPOCH +%Y-%m-%d) >>$GITHUB_ENV
           # VMLINUX_RELEASE
           VMLINUX_RELEASE="r$(date --date=@$SOURCE_DATE_EPOCH +%y%m%d)"
           echo VMLINUX_RELEASE=$VMLINUX_RELEASE
