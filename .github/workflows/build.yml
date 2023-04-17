@@ -54,21 +54,8 @@ jobs:
       - name: Build Linux kernel
         run: |
           cd $VMLINUX_KERNEL
-          mkdir initramfs
+          cp -R ../initramfs .
           cp ../$VMLINUX_BUSYBOX/busybox initramfs
-          touch initramfs/init.sh
-          echo '#!/bin/sh'                                      >> initramfs/init.sh
-          echo /bin/busybox echo ... message from /init.sh      >> initramfs/init.sh
-          echo exec /bin/sh                                     >> initramfs/init.sh
-          # echo '#!/bin/busybox sh'                            >> initramfs/init.sh
-          # echo /bin/busybox --install                         >> initramfs/init.sh
-          # echo exec /bin/sh                                   >> initramfs/init.sh
-          touch initramfs/source
-          echo file /init initramfs/init.sh 755 0 0             >> initramfs/source
-          echo dir /bin 755 0 0                                 >> initramfs/source
-          echo dir /sbin 755 0 0                                >> initramfs/source
-          echo file /bin/busybox initramfs/busybox 755 0 0      >> initramfs/source
-          echo file /bin/sh initramfs/busybox 755 0 0           >> initramfs/source
           cp ../vmlinux.config .config
           make oldconfig
           make CONFIG_INITRAMFS_SOURCE=initramfs/source -j4
