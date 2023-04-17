@@ -39,6 +39,16 @@ jobs:
         run: |
           wget -q https://busybox.net/downloads/$VMLINUX_BUSYBOX.tar.bz2
           tar xf $VMLINUX_BUSYBOX.tar.bz2
+      - name: Prepare environment
+        id: environment
+        run: |
+          # see https://reproducible-builds.org/specs/source-date-epoch/
+          SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
+          echo SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH >>$GITHUB_ENV
+          # VMLINUX_RELEASE
+          VMLINUX_RELEASE="r$(date --date=@$SOURCE_DATE_EPOCH +%y%m%d)"
+          echo VMLINUX_RELEASE=$VMLINUX_RELEASE
+          echo VMLINUX_RELEASE=$VMLINUX_RELEASE >>$GITHUB_ENV
       - name: Build Busybox
         run: |
           cd $VMLINUX_BUSYBOX
@@ -62,6 +72,16 @@ jobs:
           cp ../vmlinux.config .config
           make oldconfig
           make CONFIG_INITRAMFS_SOURCE=initramfs/source -j4
+      - name: Package vmlinux
+        run: |
+          cd $VMLINUX_KERNEL
+          zip -9 ../vmlinux-$VMLINUX_KERNEL-$VMLINUX_RELEASE.zip vmlinux
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: vmlinux
+          path: |
+            vmlinux-*.zip
       - name: Create release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
@@ -71,4 +91,4 @@ jobs:
             Included:
             - ${{ env.VMLINUX_KERNEL }}
             - ${{ env.VMLINUX_BUSYBOX }}
-          files: ${{ env.VMLINUX_KERNEL }}/vmlinux
+          files: vmlinux-*.zip
