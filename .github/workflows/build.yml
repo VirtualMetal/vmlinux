@@ -51,7 +51,7 @@ jobs:
           mkdir initramfs
           cp ../$VMLINUX_BUSYBOX/busybox initramfs
           touch initramfs/init.sh
-          echo #!/bin/busybox sh                                >> initramfs/init.sh
+          echo '#!/bin/busybox sh'                              >> initramfs/init.sh
           echo /bin/busybox install                             >> initramfs/init.sh
           echo exec /bin/sh                                     >> initramfs/init.sh
           touch initramfs/source
