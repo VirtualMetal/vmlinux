@@ -61,10 +61,9 @@ jobs:
           make CONFIG_INITRAMFS_SOURCE=initramfs/source -j4
       - name: Package vmlinux
         run: |
-          cd $VMLINUX_KERNEL
-          cp vmlinux ..
-          cp arch/x86_64/boot/bzImage ..
-          zip -9 ../vmlinux-$VMLINUX_KERNEL-$VMLINUX_RELEASE.zip vmlinux
+          cp $VMLINUX_KERNEL/vmlinux .
+          cp $VMLINUX_KERNEL/arch/x86_64/boot/bzImage .
+          zip -9 vmlinux-$VMLINUX_KERNEL-$VMLINUX_RELEASE.zip vmlinux
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
